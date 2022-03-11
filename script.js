@@ -1,4 +1,4 @@
-//defining our variables
+//Defining our variables
 let currentOperand = '';
 let previousOperand = '';
 let operator = '';
@@ -20,29 +20,49 @@ function multiply(num1, num2) { return num1 * num2 };
 function divide(num1, num2) {
     if (num2 != 0) { return num1 / num2 };
 
-    return "Black Hole"
+    alert('You cannot divide by zero!');
+    clear();
+    return null;
 };
 
-function setOperator(operator) {
-    if (currentOperand == '') return;
-    operator = operator;
+/*
+This function adds the commas to the diplayed numbers. The given
+number is split into two parts: The interger portion and the portion that
+follows the decimal. After which, the interger is made pretty by adding 
+those commas and is the recombined with the decimal portion if it exists. 
+*/
+function displayNumberHelper(number) {
+    const stringNumber = number.toString();
+    const integerPortion = parseFloat(stringNumber.split('.')[0]);
+    const decimalPortion = stringNumber.split('.')[1];
+    let integerDisplay;
+    if (isNaN(integerPortion)) {
+        integerDisplay = '';
+    } else {
+        integerDisplay = integerPortion.toLocaleString('en', { maximumFractionDigits: 0 });
+    };
+    if (decimalPortion != null) {
+        return `${integerDisplay}.${decimalPortion}`;
+    } else {
+        return integerDisplay
+    }
 }
 
-function operate(operator, num1, num2) {
-    if (operator = "ADD") { return add(num1, num2) };
-
-    if (operator = "SUBTRACT") { return subtract(num1, num2) };
-
-    if (operator = "DIVIDE") { return divide(num1, num2) };
-
-    if (operator = "MULTIPLY") { return multiply(num1, num2) };
+function setOperator(chosenOperator) {
+    if (currentOperand == '') return;
+    if (previousOperand != '') { evaluate() };
+    operator = chosenOperator;
+    previousOperand = currentOperand;
+    currentOperand = '';
 }
 
 function updateScreen() {
-    currentOperandText.innerText = currentOperand;
-    previousOperandText.innerText = previousOperand;
-    return
-
+    currentOperandText.innerText = displayNumberHelper(currentOperand);
+    if (operator != '') {
+        previousOperandText.innerText = `${displayNumberHelper(previousOperand)} ${operator}`
+    } else {
+        previousOperandText.innerText = '';
+    }
 }
 
 function clear() {
@@ -62,7 +82,34 @@ function backspace() {
 
 }
 
-//setting our listeners
+function evaluate() {
+    let result;
+    const prev = parseFloat(previousOperand);
+    const current = parseFloat(currentOperand);
+    if (isNaN(prev) || isNaN(current)) return;
+    switch (operator) {
+        case '+':
+            result = add(prev, current);
+            break
+        case '-':
+            result = subtract(prev, current);
+            break
+        case '*':
+            result = multiply(prev, current);
+            break
+        case '÷':
+            result = divide(prev, current);
+            break
+        default:
+            return
+    }
+    operator = '';
+    previousOperand = '';
+    if (result == null) return;
+    currentOperand = result;
+}
+
+//Setting our listeners
 numberButtons.forEach((button) => {
     button.addEventListener('click', () => {
         appendNumber(button.innerText);
@@ -85,4 +132,9 @@ clearButton.addEventListener('click', button => {
 backButton.addEventListener('click', button => {
     backspace();
     updateScreen();
-})
+});
+
+equalsButton.addEventListener('click', button => {
+    evaluate();
+    updateScreen();
+});
